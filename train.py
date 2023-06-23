@@ -152,5 +152,5 @@ model.state_dict = (
 
 model = torch.compile(model)
 
-trainer.train()
-model.save_pretrained(OUTPUT_DIR)
+# trainer.train()
+# model.save_pretrained(OUTPUT_DIR)

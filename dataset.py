@@ -2,19 +2,29 @@ import re
 import numpy as np
 
 
+def format_and_reverse_number(n):
+    n1 = f'{n:,}' + ('-' if n < 0 else '')
+    ss = n1.split(',')
+    res = ''
+    for i, s in enumerate(ss[::-1]):
+        if i > 0:
+            while i % 3 == 0:
+                res = '`' + res
+                i /= 3
+            res = '`' + res
+        res = s + res
+    return res[::-1]
+
 def generate_input(a, b, input_only=False):
     c = a + b
-    a_ = f'{a:,}'.replace(',', '`') + ('-' if a < 0 else '')
-    b_ = f'{b:,}'.replace(',', '`') + ('-' if b < 0 else '')
-    c_ = f'{c:,}'.replace(',', '`') + ('-' if c < 0 else '')
-    a_rev = a_[::-1]
-    b_rev = b_[::-1]
-    c_rev = c_[::-1]
+    a_rev = format_and_reverse_number(a)
+    b_rev = format_and_reverse_number(b)
+    c_rev = format_and_reverse_number(c)
     example = ''
     prompt = f'Add A={a} and B={b}. ' \
              f'Reversing the order of digits of A={a}, ' \
-             f'we obtain A_='
-    answer = f'{a_rev}. ' \
+             f'we obtain'
+    answer = f' A_={a_rev}. ' \
              f'Reversing the order of digits of B={b}, we obtain B_={b_rev}. ' \
              f'Column addition procedure for digit-reversed numbers ' \
              f'A_={a_rev} and B_={b_rev} will give C_={c_rev}. ' \
@@ -43,6 +53,9 @@ def generate_pairs(size=1000, seed=42, lengths_distribution=None):
         lengths_distribution = np.array([1] + [10 * n for n in range(1, 11)] + [1000 // n for n in range(11, 51)])
         lengths_distribution = lengths_distribution / lengths_distribution.sum()
     lengths = np.random.choice(np.arange(1, 1 + len(lengths_distribution)), p=lengths_distribution, size=[2, size])
+
+    mask = np.random.choice([True, False], p=[2/3, 1/3], size=size)
+    lengths[1, mask] = lengths[0, mask]
 
     digits = np.random.randint(0, 10, size=lengths.sum())
     digits = ''.join([str(d) for d in digits])
