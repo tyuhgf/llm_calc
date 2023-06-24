@@ -22,13 +22,13 @@ def generate_input(a, b, input_only=False):
     c_rev = format_and_reverse_number(c)
     example = ''
     prompt = f'Add A={a} and B={b}. ' \
-             f'Reversing the order of digits of A={a}, ' \
-             f'we obtain'
+             f'Reversing A={a} ' \
+             f'gives'
     answer = f' A_={a_rev}. ' \
-             f'Reversing the order of digits of B={b}, we obtain B_={b_rev}. ' \
-             f'Column addition procedure for digit-reversed numbers ' \
-             f'A_={a_rev} and B_={b_rev} will give C_={c_rev}. ' \
-             f'Reversing the digits of C_={c_rev} gives the answer C={c}.'
+             f'Reversing B={b} gives B_={b_rev}. ' \
+             f'Column addition for digit-reversed numbers ' \
+             f'A_ and B_ gives C_={c_rev}. ' \
+             f'Reversing C_ gives the answer C={c}.'
     if input_only:
         return example + prompt
     else:
@@ -54,6 +54,7 @@ def generate_pairs(size=1000, seed=42, lengths_distribution=None):
         lengths_distribution = lengths_distribution / lengths_distribution.sum()
     lengths = np.random.choice(np.arange(1, 1 + len(lengths_distribution)), p=lengths_distribution, size=[2, size])
 
+    # for 2/3 of generated pairs we set length to be equal
     mask = np.random.choice([True, False], p=[2/3, 1/3], size=size)
     lengths[1, mask] = lengths[0, mask]
 

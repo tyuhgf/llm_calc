@@ -1,4 +1,3 @@
-import json
 import transformers
 from transformers import LlamaTokenizer, LlamaForCausalLM
 from dataset import *
@@ -7,7 +6,6 @@ from dataset import *
 from peft import (
     LoraConfig,
     get_peft_model,
-    get_peft_model_state_dict,
     prepare_model_for_int8_training,
 )
 
@@ -30,9 +28,7 @@ model = LlamaForCausalLM.from_pretrained(
 
 tokenizer = LlamaTokenizer.from_pretrained(BASE_MODEL)
 
-tokenizer.pad_token_id = (
-    0  # unk. we want this to be different from the eos token
-)
+tokenizer.pad_token_id = 0
 tokenizer.padding_side = "left"
 
 
@@ -44,11 +40,11 @@ LORA_TARGET_MODULES = [
     "v_proj",
 ]
 
-BATCH_SIZE = 20  # 128
+BATCH_SIZE = 20
 MICRO_BATCH_SIZE = 4
 GRADIENT_ACCUMULATION_STEPS = BATCH_SIZE // MICRO_BATCH_SIZE
 LEARNING_RATE = 3e-4
-TRAIN_STEPS = 15000
+TRAIN_STEPS = 3000
 OUTPUT_DIR = "experiments"
 
 
@@ -89,8 +85,6 @@ data_collator = transformers.DataCollatorForSeq2Seq(
 )
 
 
-CUTOFF_LEN = 256
-
 def tokenize(prompt, add_eos_token=True, cutoff_len=512):
     result = tokenizer(
         prompt,
@@ -116,22 +110,29 @@ def generate_and_tokenize_prompt(data_point, add_eos_token=True, cutoff_len=512)
     tokenized_full_prompt = tokenize(full_prompt, add_eos_token, cutoff_len)
     return tokenized_full_prompt
 
-
-ad = AdditionDataset(tokenizer, size=10000)
-with open('llama_calc_dataset.json', 'w') as f:
-   json.dump([{'text': text} for text in ad.texts], f)
+# ad = AdditionDataset(tokenizer, size=10000)
+# with open('llama_calc_dataset.json', 'w') as f:
+#    json.dump([{'text': text} for text in ad.texts], f)
 
 data = load_dataset('json', data_files='llama_calc_dataset.json')
 
+
+CUTOFF_LEN = len(tokenize(generate_input(10**50, 10**50), cutoff_len=10000)['input_ids'])
+
+print(f'CUTOFF_LEN: {CUTOFF_LEN}')
 
 train_val = data["train"].train_test_split(
     test_size=200, shuffle=True, seed=42
 )
 train_data = (
-    train_val["train"].shuffle().map(generate_and_tokenize_prompt)
+    train_val["train"].shuffle().map(
+        lambda q: generate_and_tokenize_prompt(q, cutoff_len=CUTOFF_LEN)
+    )
 )
 val_data = (
-    train_val["test"].shuffle().map(generate_and_tokenize_prompt)
+    train_val["test"].shuffle().map(
+        lambda q: generate_and_tokenize_prompt(q, cutoff_len=CUTOFF_LEN)
+    )
 )
 
 
@@ -142,15 +143,8 @@ trainer = transformers.Trainer(
     args=training_arguments,
     data_collator=data_collator
 )
-model.config.use_cache = False
-old_state_dict = model.state_dict
-model.state_dict = (
-    lambda self, *_, **__: get_peft_model_state_dict(
-        self, old_state_dict()
-    )
-).__get__(model, type(model))
 
 model = torch.compile(model)
 
-# trainer.train()
-# model.save_pretrained(OUTPUT_DIR)
+trainer.train()
+model.save_pretrained(OUTPUT_DIR)
