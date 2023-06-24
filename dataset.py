@@ -1,5 +1,12 @@
+import json
 import re
 import numpy as np
+
+from transformers import LlamaTokenizer
+
+tokenizer = LlamaTokenizer.from_pretrained("openlm-research/open_llama_3b")
+tokenizer.pad_token_id = 0
+tokenizer.padding_side = "left"
 
 
 def format_and_reverse_number(n):
@@ -80,3 +87,9 @@ class AdditionDataset:
 
         self.pairs = self.gen_pairs(size=size, seed=seed)
         self.texts = [self.gen_input(a, b) for (a, b) in zip(*self.pairs)]
+
+
+if __name__ == '__main__':
+    ad = AdditionDataset(tokenizer, size=10000)
+    with open('llama_calc_dataset.json', 'w') as f:
+       json.dump([{'text': text} for text in ad.texts], f)
