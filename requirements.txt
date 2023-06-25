@@ -1,9 +1,10 @@
 accelerate
-bitsandbytes==0.37.2
+bitsandbytes
 datasets
-git+https://github.com/huggingface/peft.git
-git+https://github.com/huggingface/transformers.git
+peft
+transformers
 torch
 tensorboardX
+scipy
 sentencepiece
 gradio
