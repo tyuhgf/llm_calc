@@ -9,6 +9,10 @@ from evaluate import evaluate
 model = get_model('tyuhgf/llm_calc')
 evaluate(model, tokenizer)
 ```
+Also:
+```
+python run_gradio.py
+```
 
 ## Save dataset
 ```python
