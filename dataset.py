@@ -28,11 +28,9 @@ def generate_input(a, b, input_only=False):
     b_rev = format_and_reverse_number(b)
     c_rev = format_and_reverse_number(c)
     example = ''
-    prompt = f'Add A={a} and B={b}. ' \
-             f'Reversing A={a} ' \
-             f'gives'
-    answer = f' A_={a_rev}. ' \
-             f'Reversing B={b} gives B_={b_rev}. ' \
+    prompt = f'Add A={a} and B={b}.'
+    answer = f' Reversing A gives A_={a_rev}. ' \
+             f'Reversing B gives B_={b_rev}. ' \
              f'Column addition for digit-reversed numbers ' \
              f'A_ and B_ gives C_={c_rev}. ' \
              f'Reversing C_ gives the answer C={c}.'

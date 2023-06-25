@@ -48,11 +48,11 @@ def get_model(load_dir_or_repo=None):
             task_type="CAUSAL_LM",
         )
         model = get_peft_model(model, config)
-        model = torch.compile(model)
+        # model = torch.compile(model)
         return model
     else:
         model = PeftModel.from_pretrained(model, load_dir_or_repo)
-        model = torch.compile(model)
+        # model = torch.compile(model)
         return model
 
 
@@ -115,7 +115,7 @@ def prepare_trainer(model, tokenizer, train_data, val_data):
     MICRO_BATCH_SIZE = 4
     GRADIENT_ACCUMULATION_STEPS = BATCH_SIZE // MICRO_BATCH_SIZE
     LEARNING_RATE = 3e-4
-    TRAIN_STEPS = 3000
+    TRAIN_STEPS = 15000
     OUTPUT_DIR = "experiments"
 
 

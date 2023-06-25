@@ -1,6 +1,9 @@
 accelerate
 bitsandbytes==0.37.2
+datasets
 git+https://github.com/huggingface/peft.git
 git+https://github.com/huggingface/transformers.git
 torch
+tensorboardX
 sentencepiece
+gradio
